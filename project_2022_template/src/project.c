@@ -19,7 +19,7 @@ int meetings_capacity = 0;
 
 
 void add_meeting(char description[], int month, int day, int hour,int print_success) {
-    // The three following ifs check for if the values for time of the meeting is valid
+    // The three following ifs check that the values for time of the meeting are valid
     if (hour < 0 || hour > 23) {
         printf("Error: Invalid input value\n");
         return;
@@ -140,7 +140,7 @@ void load_from_file(char filename[]) {
 }
 
 
-/* Not quite clear on if the quit function should return SUCCESS as well since we are technically terminating the program, 
+/* Not quite clear on if the quit function should return SUCCESS as well since we are technically terminating the program with exit, 
 I will leave a commented out version here, not that it matters*/
 void quit_program() {
     // Frees the dynamically allocated meetings to avoid memory leaks upon program termination
