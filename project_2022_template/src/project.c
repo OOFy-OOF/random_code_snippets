@@ -50,7 +50,7 @@ void add_meeting(char description[], int month, int day, int hour,int print_succ
     // Check if the array needs to be resized and reallocate memory accordingly
     if (num_meetings == meetings_capacity) {
         meetings_capacity += 1;
-        meetings = realloc(meetings, meetings_capacity * sizeof(meeting));
+        meetings = realloc(meetings, meetings_capacity * sizeof(meeting)+2);
         if (meetings == NULL) {
             exit(1);
         }
