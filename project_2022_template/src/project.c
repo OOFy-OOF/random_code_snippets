@@ -101,7 +101,7 @@ void delete_meeting(int month, int day, int hour) {
             }
             num_meetings--;
             meetings_capacity--; 
-            /* If you look through all my failed submissions you will notice that I completely forgot that 
+            /* If you look through all my previous versions you will notice that I completely forgot that 
             I didn't decrease the meeting capacity each time something is deleted which completely breaks memory allocation D:, good thing I figured it out*/
             meetings = (meeting*) realloc(meetings, num_meetings * sizeof(meeting));  
             deleted = 1;
