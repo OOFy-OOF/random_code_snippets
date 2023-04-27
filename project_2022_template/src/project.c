@@ -3,7 +3,7 @@
 #include <string.h>
 
 
-#define MAX_INPUT_LEN 150
+#define MAX_INPUT_LEN 150 // Assume the user will not input a command longer than 150 characters
 #define MAX_DESC_LEN 100 // Assume the user will not use a description longer than 100 characters
 #define MAX_FILENAME_LEN 100 // Assume the user will not use a file title longer than 100 characters
 
@@ -79,7 +79,8 @@ void add_meeting(char description[], int month, int day, int hour,int print_succ
 
 
 void delete_meeting(int month, int day, int hour) {
-    // Same check as in add to match the output of the submission checker
+    /* Same check as in add_meeting to match the output of the submission checker, this is super redundant because you cannot create a meeting 
+    with invalid values to begin with therefore the delete command will output the meeting not found error anyways and do nothing */
     if (month < 0 || month > 12) {
         printf("Month cannot be less than 1 or greater than 12.\n");
         return;
@@ -99,9 +100,10 @@ void delete_meeting(int month, int day, int hour) {
             for (int j = i; j < num_meetings-1; j++) {
                 meetings[j] = meetings[j+1];
             }
+            // Reduce the number of meetings and meeting capacity left after the deletion
             num_meetings--;
             meetings_capacity--; 
-            /* If you look through all my previous versions you will notice that I completely forgot that 
+            /* If you look through all my failed submissions you will notice that I completely forgot that 
             I didn't decrease the meeting capacity each time something is deleted which completely breaks memory allocation D:, good thing I figured it out*/
             meetings = (meeting*) realloc(meetings, num_meetings * sizeof(meeting));  
             deleted = 1;
@@ -115,9 +117,6 @@ void delete_meeting(int month, int day, int hour) {
 }
 
 
-
-
-
 void print_calendar() {
     for (int i = 0; i < num_meetings; i++) {
         // Prints the meeting list in the desired format required by the assignment
@@ -129,12 +128,13 @@ void print_calendar() {
 
 
 void save_to_file(char filename[]) {
+    // Write to file with user defined filename
     FILE *file = fopen(filename, "w");
     if (file == NULL) {
         printf("Error: Could not open file.\n");
         return;
     }
-    // Loop to add each meeting into the file until there are none left
+    // Loop to add each meeting stored in memory into the file one by one
     for (int i = 0; i < num_meetings; i++) { 
         fprintf(file, "%s %02d.%02d at %02d\n", meetings[i].description, meetings[i].day, meetings[i].month, meetings[i].hour);     
     }
@@ -171,9 +171,6 @@ void quit_program() {
 }
 
 
-// Main function is pretty straight forward, read the first letter with scanf and split into different cases for the commands each letter corresponds to
-
-
 int main() {
     char input[MAX_INPUT_LEN];
     char command, desc[MAX_DESC_LEN], filename[MAX_FILENAME_LEN];
@@ -194,45 +191,154 @@ int main() {
         }
 
         switch (command) {
-            case 'A':
-                sscanf_retval = sscanf(input, " %c %s %d %d %d", &command, desc, &month, &day, &hour);
-                if (sscanf_retval < 5) {
+            case 'A':;
+                /* assign tokens instead of using sscanf on the whole command to avoid using a defined split pattern, allowing us to detect and report if there are more arguments than needed, 
+                sscanf does not suffice for the initial split because it will ignore the extra arguments due to the set format, 
+                this will be repeated in all cases that have arguments, sscanf is then used on the month, day, and hour arguments (if present) to check that they are actually numbers*/
+                char* atok = strtok(input, " ");
+                if (atok == NULL) {
                     printf("A should be followed by exactly 4 arguments.\n");
                     continue;
                 }
+                int a_argc = 0;
+                while (atok != NULL) {
+                    a_argc++;
+                    if (a_argc == 1) {
+                        command = atok[0];
+                    } else if (a_argc == 2) {
+                        // Copy to avoid losing data
+                        strncpy(desc, atok, MAX_DESC_LEN);
+
+                    } else if (a_argc == 3) {
+                        if (sscanf(atok, "%d", &month) != 1) { // Check if the input month is actually a number
+                            printf("Invalid month argument.\n");
+                            break;
+                        }
+                    } else if (a_argc == 4) {
+                        if (sscanf(atok, "%d", &day) != 1) { // Check if the input for day is actually a number
+                            printf("Invalid day argument.\n");
+                            break;
+                        }
+                    } else if (a_argc == 5) {
+                        if (sscanf(atok, "%d", &hour) != 1) { // Check if the input for hour is actually a number
+                            printf("Invalid hour argument.\n");
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                    atok = strtok(NULL, " ");
+                }
+                if (a_argc != 5) {
+                    printf("A should be followed by exactly 4 arguments.\n");
+                    break;
+                }
                 add_meeting(desc, month, day, hour, 1);
                 break;
-            case 'D':
-                sscanf_retval = sscanf(input, " %c %d %d %d", &command, &month, &day, &hour);
-                if (sscanf_retval < 4) {
+
+
+            case 'D':;
+                char* dtok = strtok(input, " ");
+                if (dtok == NULL) {
                     printf("D should be followed by exactly 3 arguments.\n");
                     continue;
                 }
+                int d_argc = 0;
+                while (dtok != NULL) {
+                    d_argc++;
+                    if (d_argc == 1) {
+                        command = dtok[0];
+                    } else if (d_argc == 2) {
+                        if (sscanf(dtok, "%d", &month) != 1) {
+                            printf("Invalid month argument.\n");
+                            break;
+                        }
+                    } else if (d_argc == 3) {
+                        if (sscanf(dtok, "%d", &day) != 1) {
+                            printf("Invalid day argument.\n");
+                            break;
+                        }
+                    } else if (d_argc == 4) {
+                        if (sscanf(dtok, "%d", &hour) != 1) {
+                            printf("Invalid hour argument.\n");
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                    dtok = strtok(NULL, " ");
+                }
+                if (d_argc != 4) {
+                    printf("D should be followed by exactly 3 arguments.\n");
+                    break;
+                }
                 delete_meeting(month, day, hour);
                 break;
-            case 'L':
+
+
+            case 'L':;
                 print_calendar();
                 break;
-            case 'W':
-                sscanf_retval = sscanf(input, " %c %s", &command, filename);
-                if (sscanf_retval < 2) {
+
+
+            case 'W':;
+                char* wtok = strtok(input, " ");
+                if (wtok == NULL) {
                     printf("W should be followed by exactly 1 argument.\n");
-                    continue;
+                    break;
+                }
+                int w_argc = 0;
+                while (wtok != NULL) {
+                    w_argc++;
+                    if (w_argc == 1) {
+                        command = wtok[0];
+                    } else if (w_argc == 2) {
+                        strncpy(filename, wtok, MAX_FILENAME_LEN);
+                    } else {
+                        break;
+                    }
+                    wtok = strtok(NULL, " ");
+                }
+                if (w_argc != 2) {
+                    printf("W should be followed by exactly 1 argument.\n");
+                    break;
                 }
                 save_to_file(filename);
                 break;
-            case 'O':
-                sscanf_retval = sscanf(input, " %c %s", &command, filename);
-                if (sscanf_retval < 2) {
+
+
+            case 'O':;
+                char* otok = strtok(input, " ");
+                if (otok == NULL) {
+                printf("O should be followed by exactly 1 argument.\n");
+                break;
+                }
+                int o_argc = 0;
+                while (otok != NULL) {
+                    o_argc++;
+                    if (o_argc == 1) {
+                        command = otok[0];
+                    } else if (o_argc == 2) {
+                        strncpy(filename, otok, MAX_FILENAME_LEN);
+                    } else {
+                        break;
+                    }
+                    otok = strtok(NULL, " ");
+                }
+                if (o_argc != 2) {
                     printf("O should be followed by exactly 1 argument.\n");
-                    continue;
+                    break;
                 }
                 load_from_file(filename);
                 break;
-            case 'Q':
+
+
+            case 'Q':;
                 quit_program();
                 break;
-            default:
+
+
+            default:;
                 printf("Invalid command %c\n", command);
         }
     }
