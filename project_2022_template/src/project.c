@@ -222,7 +222,7 @@ int main() {
                     } else if (a_argc == 5) {
                         if (sscanf(atok, "%d", &hour) != 1) { // Check if the input for hour is actually a number
                             printf("Invalid hour argument.\n");
-                            break;
+                            continue;
                         }
                     } else {
                         break;
@@ -261,7 +261,7 @@ int main() {
                     } else if (d_argc == 4) {
                         if (sscanf(dtok, "%d", &hour) != 1) {
                             printf("Invalid hour argument.\n");
-                            break;
+                            continue;
                         }
                     } else {
                         break;
@@ -345,7 +345,3 @@ int main() {
 
     return 0;
 }
-
-
-
-
