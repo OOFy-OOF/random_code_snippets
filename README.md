@@ -1,2 +1,2 @@
-# random-schoolwork-lol
-Programming assignments dump
+# Code snippets from either school work or random
+Garbage dump
